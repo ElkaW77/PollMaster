@@ -89,7 +89,7 @@ public class Command extends ListenerAdapter {
         builder.setTitle("Poll Id: " + poll.getId());
         builder.setDescription(poll.getQuestion());
         poll.getOptions().forEach(opt ->
-                builder.addField(opt.getEmoji() + opt.getText(), this.percentage(opt), false));
+                builder.addField(opt.getEmoji() + opt.getText() + "(" + opt.getPercentage() * 100 + "%)", this.percentage(opt), false));
 
         return builder.build();
     }
