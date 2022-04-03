@@ -1,3 +1,5 @@
+package ReactionPoll;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

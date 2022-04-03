@@ -1,10 +1,14 @@
+package ReactionPoll;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,10 +22,11 @@ public class Command extends ListenerAdapter {
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         String[] args = event.getMessage().getContentStripped().split(",");
 
-        if (event.getMessage().getContentStripped().startsWith(Main.prefix + "poll")) {
+        if (event.getMessage().getContentStripped().startsWith("poll")) {
 
-            if(args.length < 4) {
-                System.out.println("lol");
+            //If there are less than 2 or more than 10 options
+            if(args.length < 4 || args.length > 12){
+                event.getChannel().sendMessageEmbeds(errorEmbed()).queue();
                 return;
             }
 
@@ -50,14 +55,28 @@ public class Command extends ListenerAdapter {
 
 
     @Override
-    public void onGenericMessageReaction(@NotNull GenericMessageReactionEvent event) {
+    public void onMessageReactionAdd(@Nonnull MessageReactionAddEvent event) {
         if(!event.getUserId().equals("959911030790688769")) {
             System.out.println("reaction");
             String emoji = event.getReactionEmote().getEmoji();
             int optId = this.getIdByEmoji(emoji);
             Poll poll = polls.stream().filter(p -> p.getMId().equals(event.getMessageId())).findAny().get();
             polls.remove(poll);
-            poll.vote(optId);
+            poll.vote(optId, 1);
+            polls.add(poll);
+
+            event.getChannel().editMessageEmbedsById(poll.getMId(), pollEmbed(poll)).queue();
+        }
+    }
+
+    @Override
+    public void onMessageReactionRemove(@Nonnull MessageReactionRemoveEvent event) {
+        if(!event.getUserId().equals("959911030790688769")) {
+            String emoji = event.getReactionEmote().getEmoji();
+            int optId = this.getIdByEmoji(emoji);
+            Poll poll = polls.stream().filter(p -> p.getMId().equals(event.getMessageId())).findAny().get();
+            polls.remove(poll);
+            poll.vote(optId, -1);
             polls.add(poll);
 
             event.getChannel().editMessageEmbedsById(poll.getMId(), pollEmbed(poll)).queue();
@@ -66,7 +85,7 @@ public class Command extends ListenerAdapter {
 
     private MessageEmbed pollEmbed(Poll poll){
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.DARK_GRAY);
+        builder.setColor(Color.cyan);
         builder.setTitle("Poll Id: " + poll.getId());
         builder.setDescription(poll.getQuestion());
         poll.getOptions().forEach(opt ->
@@ -75,13 +94,17 @@ public class Command extends ListenerAdapter {
         return builder.build();
     }
 
+    private MessageEmbed errorEmbed() {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.RED);
+        builder.setTitle("Error");
+        builder.setDescription("Mindestens 2 und maximal 10 Auswahlmöglichkeiten!");
+        return builder.build();
+    }
+
     private String percentage(Option opt){
         if(opt.getPercentage() == 0){
-            String percentage = "";
-            for (int i = 0; i < 26; i++) {
-                percentage += ":white_large_square:";
-            }
-            return percentage;
+            return ":white_large_square:".repeat(26);
         }
 
         float i = 1;
@@ -89,14 +112,14 @@ public class Command extends ListenerAdapter {
             i++;
         }
 
-        String percentage = "";
+        StringBuilder percentage = new StringBuilder();
         for (float j = 0; j < i - 1; j++) {
-            percentage += ":green_square:";
+            percentage.append(":green_square:");
         }
         for (float j = i; j <= 26; j++) {
-            percentage += ":white_large_square:";
+            percentage.append(":white_large_square:");
         }
-        return percentage;
+        return percentage.toString();
     }
 
     public int getIdByEmoji(String emoji) {

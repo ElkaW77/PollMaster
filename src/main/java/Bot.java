@@ -1,3 +1,4 @@
+import Config.BotProperties;
 import ReactionPoll.Command;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -14,7 +15,7 @@ public class Bot {
     public static JDABuilder builder;
 
     public static void main(String[] args) throws LoginException, IOException {
-        builder = JDABuilder.createDefault("OTU5OTExMDMwNzkwNjg4NzY5.Ykiw0A.JRTq7M70PLsk-A3mzcF-PS-plVg");
+        builder = JDABuilder.createDefault(BotProperties.getInstance().getToken());
         builder.addEventListeners(new Command());
         jda = builder.build();
 
