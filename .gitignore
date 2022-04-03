@@ -2,3 +2,4 @@
 /target/
 .env.properties
 .idea
+/.idea/
