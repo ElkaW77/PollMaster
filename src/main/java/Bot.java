@@ -1,3 +1,4 @@
+import ReactionPoll.Command;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -7,14 +8,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class Main {
+public class Bot {
 
     public static JDA jda;
     public static JDABuilder builder;
-    public static String prefix = "!";
 
     public static void main(String[] args) throws LoginException, IOException {
-        builder = JDABuilder.createDefault("");
+        builder = JDABuilder.createDefault("OTU5OTExMDMwNzkwNjg4NzY5.Ykiw0A.JRTq7M70PLsk-A3mzcF-PS-plVg");
         builder.addEventListeners(new Command());
         jda = builder.build();
 
